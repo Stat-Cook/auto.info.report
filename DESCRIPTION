@@ -1,0 +1,33 @@
+Package: MI.report
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+Encoding: UTF-8
+LazyData: true
+License: MIT + file LICENSE
+RoxygenNote: 7.2.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports:
+  glue,
+  usethis,
+  dplyr,
+  tidyselect,
+  R6,
+  magrittr,
+  pkgdown,
+  yaml,
+  purrr,
+  Hmisc,
+  ggplot2,
+  plotly,
+  DT,
+  infotheo,
+  tidyr
+
