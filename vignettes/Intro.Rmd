@@ -1,0 +1,63 @@
+---
+title: "Intro"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(MI.report)
+```
+
+When working with multiple data sets it can be helpful to have a standardized 
+data pipeline for reporting summary metrics and making the reports openly 
+available.  This package serves as an API for producing data-type dependent 
+summaries of all variables in a data set rendered as html reports for access 
+via web hosting e.g. github pages.
+
+The key entry to the package is via the `new_data_report` function: 
+
+```{r setup, eval=F}
+library(MI.report)
+dr <- new_data_report(path = "~/Data.Report")
+```
+
+which takes one argument - the system path to the desired directory for the 
+data report files.  The `new_data_report` function return a `DataReport` class 
+which handles the construction of vignettes and pkgdown features.
+
+In order to write a vignette using the supplied template - `DataReport` expects
+a list of data frames, one for each data types defined (currently `numeric`, 
+`date`,  `datetime` and `other`) where each data type have their own summary 
+metrics.  The function `typed_summary_metrics` has been supplied as an easy 
+binding to the default summary metrics, and below we demonstrate it being 
+applied to the standard `iris` data set.
+
+``` {r}
+`Iris Data` <- list(
+  typed.report = typed_summary_metrics(iris)
+)
+``` 
+
+To template a new vignette off of this summary - call the `add_vigentte` method
+of the earlier generated `DataReport`, passing the metrics as the data argument.
+The package will then store this data in the desired data report project, and 
+create a vignette based on the values.
+
+``` {r, eval=F}
+dr$add_vignette(name="Iris Data", 
+                data=`Iris Data`, description="Example data set - IRIS ")
+```
+
+To launch the website and check the new vignette  evaluate the `build_site`
+method.
+
+``` {r, eval=F}
+dr$build_site()
+```
