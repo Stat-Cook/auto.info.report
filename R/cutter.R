@@ -17,8 +17,11 @@ Cutter <- R6Class("Cutter", list(
       stop(glue("Method '{method}' not implemented."))
     }
 
+    non.na.data <- data[!is.na(data)]
+
     method.f <- methods[[method]]
-    cuts <- method.f(data, n)
+
+    cuts <- method.f(non.na.data, n)
     self$cuts <- extend_to_inf(cuts)
 
     self$transform(data)
