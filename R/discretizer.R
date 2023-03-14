@@ -43,6 +43,14 @@ discretize <- function(data, n=5, method="equalfreq"){
   apply_discretizer(data, discretizers)
 }
 
+is.singular <- function(vec){
+  length(unique(vec)) == 1
+}
+
+is.not.singular <- function(vec){
+  !is.singular(vec)
+}
+
 paired.mutinfo <- function(data){
   #' @importFrom dplyr desc filter arrange
   #' @importFrom tidyr pivot_longer
@@ -50,7 +58,18 @@ paired.mutinfo <- function(data){
 
   Variable <- Explainer <- `Entropy Ratio` <- NULL
 
-  disc  <- data %>% discretize()
+  singular.cols <- data %>% select(where(is.singular)) %>% colnames()
+
+  if (length(singular.cols)){
+    msg <- paste(singular.cols, collapse=", ")
+    warning(glue("Column(s) {msg} were excluded from mutual \\
+                 information analysis (singular)."))
+  }
+
+  disc  <- data %>%
+    select(-all_of(singular.cols)) %>%
+    discretize()
+
   mi <- disc %>% mutinformation()
   entropy <- diag(mi)
 
