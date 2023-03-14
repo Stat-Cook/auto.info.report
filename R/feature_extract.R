@@ -36,9 +36,18 @@ contrast_groups <- function(contrast){
   .lis
 }
 
+
+as.character_with_na <- function(vec){
+  vec <- as.character(vec)
+  vec[is.na(vec)] <- "NA"
+  vec
+}
+
 styled_model_matrix <- function(data, formula= ~ . , style_func=style_contrasts){
 
-  factored_data <- mutate(data, across(where(is.character), as.factor))
+  data.ns <- data %>% select(is.not.singular)
+  na_as_characters <- mutate(data.ns, across(where(is.discrete), as.character_with_na))
+  factored_data <- mutate(na_as_characters, across(where(is.character), as.factor))
 
   contrasts.arg <- contrasts.arg.func(factored_data, style_func)
   con_grps <- contrast_groups(contrasts.arg)
