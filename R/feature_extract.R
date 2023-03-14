@@ -36,19 +36,18 @@ contrast_groups <- function(contrast){
   .lis
 }
 
-data <- data.frame(A = rnorm(100), B = sample(letters[1:4], 100, T))
-style_func <- style_contrasts
-formula <-  ~ .
-
 styled_model_matrix <- function(data, formula= ~ . , style_func=style_contrasts){
+
   factored_data <- mutate(data, across(where(is.character), as.factor))
 
   contrasts.arg <- contrasts.arg.func(factored_data, style_func)
   con_grps <- contrast_groups(contrasts.arg)
 
+  frm <- model.frame(~., data=factored_data, na.action = na.pass)
+
   mat <- stats::model.matrix(
     formula,
-    data = factored_data,
+    data = frm,
     contrasts.arg = contrasts.arg
   ) %>%
     dplyr::as_tibble() %>%
