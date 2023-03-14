@@ -30,7 +30,8 @@ discretizer_mutate.f <- function(i, discretizer) {
 }
 
 non.discrete <- function(vec){
-  any(round(vec) != vec)
+  non.na.vec <- vec[!is.na(vec)]
+  any(round(non.na.vec) != non.na.vec)
 }
 
 discretize <- function(data, n=5, method="equalfreq"){
