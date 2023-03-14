@@ -118,12 +118,28 @@ scaled.data <- function(data, formula= ~ 1 + ., style_func=style_contrasts){
   scaled.data.matrix(result$Matrix, result$`Constrast Groups`)
 }
 
+any_na <- function(vec){
+  any(is.na(vec))
+}
+
+numeric_impute <- function(data, func=~ 0){
+  #' @export purrr map
+  #'
+
+  replacements <- data %>% select(where(is.numeric)) %>%
+    select(where(any_na)) %>%
+    purrr::map(func)
+
+  tidyr::replace_na(data, replacements)
+}
 
 pca <- function(data, report_downsample=2500){
   #' @importFrom stats model.matrix prcomp
   data.matrix <- scaled.data(data=data, formula= ~ .)
 
-  pca <- prcomp(data.matrix)
+  imputed.data.matrix <- numeric_impute(data.matrix, ~ 0)
+
+  pca <- prcomp(imputed.data.matrix)
   total.var <- sum(pca$sdev)
 
   k <- length(pca$sdev)
