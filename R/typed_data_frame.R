@@ -59,6 +59,10 @@ TypedDataFrame <- R6Class("TypedDataFrame", list(
 ))
 
 get.by.parse <- function(data, parse, .class=NULL){
+  UseMethod("get.by.parse", parse)
+}
+
+get.by.parse.default <- function(data, parse, .class=NULL){
   #' @importFrom magrittr %>%
   #' @importFrom dplyr mutate select across cur_column
   #' @importFrom tidyselect where all_of
@@ -74,6 +78,18 @@ get.by.parse <- function(data, parse, .class=NULL){
   frm
 }
 
+
+get.by.parse.list <- function(data, parse, .class=NULL){
+  .lis <- map(parse, function(i) get.by.parse(data, i, .class), .progress=T)
+
+  bindfrm <- do.call(cbind, .lis)
+  colnames(bindfrm) <- unlist(
+    map2(.lis, names(.lis), ~ glue("{colnames(.x)} [parser: {.y}]"))
+  )
+
+  bindfrm
+}
+
 remainder.frame <- function(data, parsed.data.frames){
   .cols <- colnames(data)
 
@@ -87,17 +103,3 @@ remainder.frame <- function(data, parsed.data.frames){
   unused.cols <- .cols[!.cols %in% used.cols]
   select(data, unused.cols)
 }
-
-
-#
-# df <- data.frame(
-#   A = sample(letters, 400, T),
-#   B = sample(LETTERS, 400, T),
-#   C = rnorm(400),
-#   D = c(sample(letters, 200, T), rnorm(200)),
-#   E = factor(sample(letters, 400, T))
-# )
-#
-# tdf <- TypedDataFrame$new(df)
-# tdf$parsed.data.frames[["character"]]
-#

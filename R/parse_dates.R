@@ -23,13 +23,34 @@ DATE.FORMATS <- c("%y-%m-%d", "%Y-%m-%d",
 
 DATE.TIME.FORMATS <- paste(DATE.FORMATS, "%H:%M:%S")
 
-parse_dates <- function(data, date.formats=DATE.FORMATS){
-  .lis <- lapply(
-    date.formats,
-    function(i) strptime(data, i)
-  )
-  reduce(.lis, na_reduce)
+date_function <- function(vec){
+  UseMethod("date_function")
 }
+
+date_function.default <- function(vec){
+  rep(NA, length(vec))
+}
+
+date_function.Date <- function(vec){
+  vec
+}
+
+date_function.POSIXt <- function(vec){
+  as.Date(vec)
+}
+
+make.date.parse <- function(frmt){
+  function(vec){
+    if (is.character(vec)){
+      return(lubridate::fast_strptime(vec, frmt))
+    }
+
+    return(rep(NA, length(vec)))
+  }
+}
+
+parse_dates <- map(DATE.FORMATS, make.date.parse)
+parse_dates <- append(pase_dates, list("None" = date_function))
 
 parse_datetimes <- function(data, date.time.formats=DATE.TIME.FORMATS){
   .lis <- lapply(
