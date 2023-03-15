@@ -69,10 +69,12 @@ datetime_function <- function(vec){
 }
 
 datetime_function.default <- function(vec){
+  #' @exportS3Method
   rep(NA, length(vec))
 }
 
 datetime_function.POSIXt <- function(vec){
+  #' @exportS3Method
   return(vec)
 }
 
