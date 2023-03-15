@@ -46,16 +46,19 @@ TypedDataFrame <- R6Class("TypedDataFrame", list(
   }
 ))
 
-get.by.parse <- function(data, parse, .class=NULL){
-
-  frm <- UseMethod("get.by.parse", parse)
-
+name.parse <- function(frm, .class){
   if (!is.null(.class)){
     .class <- paste(.class, "data.frame", sep=".")
     class(frm) <- prepend(class(frm), .class)
   }
 
   frm
+}
+
+get.by.parse <- function(data, parse, .class=NULL){
+
+  UseMethod("get.by.parse", parse)
+
 }
 
 get.by.parse.default <- function(data, parse, .class=NULL){
@@ -68,21 +71,22 @@ get.by.parse.default <- function(data, parse, .class=NULL){
     dplyr::mutate(across(.fns = parse, .names = "{.col}")) %>%
     select(where(not.all.missing))
 
-
-  frm
+  name.parse(frm, .class)
 }
-
 
 get.by.parse.list <- function(data, parse, .class=NULL){
   #' @exportS3Method
   .lis <- map(parse, function(i) get.by.parse(data, i, .class), .progress=T)
 
   bindfrm <- do.call(cbind, .lis)
+
   colnames(bindfrm) <- unlist(
     map2(.lis, names(.lis), ~ glue("{colnames(.x)} [parser: {.y}]"))
   )
 
   bindfrm
+
+  name.parse(bindfrm, .class)
 }
 
 remainder.frame <- function(data, parsed.data.frames){
