@@ -49,8 +49,8 @@ make.date.parse <- function(frmt){
   }
 }
 
-parse_dates <- map(DATE.FORMATS, make.date.parse)
-parse_dates <- append(pase_dates, list("None" = date_function))
+parse_dates <- purrr::map(DATE.FORMATS, make.date.parse)
+parse_dates <- append(parse_dates, list("None" = date_function))
 
 parse_datetimes <- function(data, date.time.formats=DATE.TIME.FORMATS){
   .lis <- lapply(
