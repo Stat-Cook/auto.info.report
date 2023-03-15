@@ -44,6 +44,7 @@ as.character_with_na <- function(vec){
 }
 
 styled_model_matrix <- function(data, formula= ~ . , style_func=style_contrasts){
+  #' @importFrom plyr is.discrete
 
   data.ns <- data %>% select(is.not.singular)
   na_as_characters <- mutate(data.ns, across(where(is.discrete), as.character_with_na))
@@ -94,6 +95,7 @@ group_standardize <- function(data, cols){
 }
 
 scaled.data.matrix <- function(data.matrix, factors=list()){
+  #' @importFrom dplyr as_tibble
   non.factor.data <- data.matrix  %>%
     select(!unlist(factors))
 
@@ -133,9 +135,42 @@ numeric_impute <- function(data, func=~ 0){
   tidyr::replace_na(data, replacements)
 }
 
-pca <- function(data, report_downsample=2500){
+limit_cardinality_factory <- function(limit = 10){
+  function(vec) {
+    if (is.discrete(vec)){
+      return(length(unique(vec)) <= limit)
+    }
+
+    TRUE
+  }
+}
+
+col_diff_warning <- function(frm1, frm2,
+                             msg = "Column(s) {.x} not present."){
+  cols.frm1 <- colnames(frm1)
+  cols.frm2 <- colnames(frm2)
+
+  col.diff <- cols.frm1[!cols.frm1 %in% cols.frm2]
+
+  if (length(col.diff)){
+    .x <- paste("`", col.diff, "`", sep="", collapse = ", ")
+    message(glue(msg))
+  }
+}
+
+
+pca <- function(data, report_downsample=2500, max_cardinality=10){
   #' @importFrom stats model.matrix prcomp
-  data.matrix <- scaled.data(data=data, formula= ~ .)
+  #'
+  limited_cardinality <- data %>%
+    select(where(limit_cardinality_factory(max_cardinality)))
+
+  col_diff_warning(data, limited_cardinality,
+                   msg = "Column(s) {.x} removed due to high cardinality")
+
+  high_cardinality <- colnames(data)[!colnames(data) %in% colnames(limited_cardinality)]
+
+  data.matrix <- scaled.data(data=limited_cardinality, formula= ~ .)
 
   imputed.data.matrix <- numeric_impute(data.matrix, ~ 0)
 
