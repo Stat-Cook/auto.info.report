@@ -16,7 +16,7 @@ get_sql_table.ident <- function(query){
 
 make_sample_text <- function(rows = NULL, percent = NULL){
   if (!is.null(rows)){
-    return(glue("{rows} ROWS"))
+    return(glue("{as.integer(rows)} ROWS"))
   }
 
   if (!is.null(percent)){
