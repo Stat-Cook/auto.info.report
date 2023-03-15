@@ -60,3 +60,18 @@ parse_datetimes <- function(data, date.time.formats=DATE.TIME.FORMATS){
   reduce(.lis, na_reduce)
 }
 
+
+datetime_function <- function(vec){
+  UseMethod("datetime_function")
+}
+
+datetime_function.default <- function(vec){
+  rep(NA, length(vec))
+}
+
+datetime_function.POSIXt <- function(vec){
+  return(vec)
+}
+
+parse_datetimes <- purrr::map(DATE.TIME.FORMATS, make.date.parse)
+parse_datetimes <- append(parse_datetimes, list("None" = datetime_function))
