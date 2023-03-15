@@ -4,9 +4,9 @@ typed_summary_metrics <- function(data, func=summarize_typed_frame){
   tdf$summarize_parsed_frames(summarize_typed_frame)
 }
 
-parse_funcs <- c("numeric" = as.numeric,
+parse_funcs <- list("numeric" = as.numeric,
                  "date" = parse_dates,
-                 "datatime" = parse_datetimes,
+                 "datetime" = parse_datetimes,
                  "character" = parse_character,
                  "factor" = parse_factor
                  )
@@ -22,7 +22,7 @@ TypedDataFrame <- R6Class("TypedDataFrame", list(
     self$parse_funcs = .parse_funcs
 
     for (parse_name in names(self$parse_funcs)){
-      parser <- self$parse_funcs[parse_name]
+      parser <- self$parse_funcs[[parse_name]]
 
       self$parsed.data.frames[[parse_name]] <-
         get.by.parse(data, parser, parse_name)
