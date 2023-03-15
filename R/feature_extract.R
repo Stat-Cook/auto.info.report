@@ -123,7 +123,7 @@ any_na <- function(vec){
 }
 
 numeric_impute <- function(data, func=~ 0){
-  #' @export purrr map
+  #' @importFrom purrr map
   #'
 
   replacements <- data %>% select(where(is.numeric)) %>%
