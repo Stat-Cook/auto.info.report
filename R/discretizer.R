@@ -35,6 +35,7 @@ non.discrete <- function(vec){
   any(round(non.na.vec) != non.na.vec)
 }
 
+
 discretize <- function(data, n=5, method="equalfreq"){
   non.disc <- data %>%
     select(where(is.numeric)) %>%
@@ -72,7 +73,11 @@ paired.mutinfo <- function(data){
     select(-all_of(singular.cols)) %>%
     discretize()
 
-  mi <- disc %>% mutinformation()
+  disc[is.na(disc)] <- "NA"
+
+  mi <- disc %>%
+    mutinformation()
+
   entropy <- diag(mi)
 
   (mi / entropy) %>%
