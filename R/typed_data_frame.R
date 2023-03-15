@@ -28,18 +28,6 @@ TypedDataFrame <- R6Class("TypedDataFrame", list(
         get.by.parse(data, parser, parse_name)
     }
 
-
-    # self$parsed.data.frames[["date"]] <-
-    #   get.by.parse(data, parse_dates, "date")
-    # self$parsed.data.frames[["datetime"]] <-
-    #   get.by.parse(data, parse_datetimes, "datetime")
-    # self$parsed.data.frames[["character"]] <-
-    #   get.by.parse(data, parse_characters, "character")
-    # self$parsed.data.frames[["factors"]] <-
-    #   get.by.parse(data, parse_characters, "factors")
-
-    # self$parsed.data.frames[["other"]] <- remainder.frame(data, self$parsed.data.frame)
-
     self$types <- names(self$parsed.data.frame)
   },
   get.data = function(type="numeric"){
@@ -59,7 +47,15 @@ TypedDataFrame <- R6Class("TypedDataFrame", list(
 ))
 
 get.by.parse <- function(data, parse, .class=NULL){
-  UseMethod("get.by.parse", parse)
+
+  frm <- UseMethod("get.by.parse", parse)
+
+  if (!is.null(.class)){
+    .class <- paste(.class, "data.frame", sep=".")
+    class(frm) <- prepend(class(frm), .class)
+  }
+
+  frm
 }
 
 get.by.parse.default <- function(data, parse, .class=NULL){
@@ -71,10 +67,7 @@ get.by.parse.default <- function(data, parse, .class=NULL){
     dplyr::mutate(across(.fns = parse, .names = "{.col}")) %>%
     select(where(not.all.missing))
 
-  if (!is.null(.class)){
-    .class <- paste(.class, "data.frame", sep=".")
-    class(frm) <- prepend(class(frm), .class)
-  }
+
   frm
 }
 
