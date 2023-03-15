@@ -42,7 +42,7 @@ collect_sample <- function(query, rows = NULL, percent = NULL){
 
   cat(new.sql.str)
 
-  send <- DBI::dbSendQuery(q$src$con, new.sql.str)
+  send <- DBI::dbSendQuery(query$src$con, new.sql.str)
   result <- DBI::dbFetch(send)
 
   if (nrow(result) == 0){
