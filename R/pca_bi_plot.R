@@ -28,7 +28,7 @@ bi.plot <- function(pca, x.index, y.index){
 }
 
 bi.plot.prcomp <- function(pca, x.index, y.index){
-  #' @export
+  #' @exportS3Method
   pca.prep <- pca_bi_prep(pca)
   bi.plot(pca.prep, x.index, y.index)
 }
@@ -36,7 +36,7 @@ bi.plot.prcomp <- function(pca, x.index, y.index){
 max.scale <- function(vec) max(abs(vec))
 
 bi.plot.pca_bi_prep <- function(pca.prep, x.index, y.index){
-  #' @export
+  #' @exportS3Method
   #' @importFrom ggplot2 ggplot aes xlab ylab
   #' @importFrom ggplot2 geom_point geom_segment arrow unit
   #' @importFrom plotly ggplotly add_annotations

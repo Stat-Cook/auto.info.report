@@ -30,7 +30,7 @@ summarize_typed_frame.default <- function(data, ...){
 
 summarize_typed_frame.numeric.data.frame <- function(data, ...){
   #' @importFrom stats median
-  #' @export
+  #' @exportS3Method
   specific.metrics <- data.frame(
     Mean = sapply(data, mean),
     Median = sapply(data, median),
@@ -45,7 +45,7 @@ summarize_typed_frame.numeric.data.frame <- function(data, ...){
 }
 
 summarize_typed_frame.date.data.frame <- function(data, ...){
-  #' @export
+  #' @exportS3Method
   specific.metrics <- data.frame(
     ID = colnames(data)
   )
@@ -57,7 +57,7 @@ summarize_typed_frame.date.data.frame <- function(data, ...){
 }
 
 summarize_typed_frame.datetime.data.frame <- function(data, ...){
-  #' @export
+  #' @exportS3Method
   specific.metrics <- data.frame(
     ID = colnames(data)
   )

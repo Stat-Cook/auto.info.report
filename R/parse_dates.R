@@ -28,14 +28,17 @@ date_function <- function(vec){
 }
 
 date_function.default <- function(vec){
+  #' @exportS3Method
   rep(NA, length(vec))
 }
 
 date_function.Date <- function(vec){
+  #' @exportS3Method
   vec
 }
 
 date_function.POSIXt <- function(vec){
+  #' @exportS3Method
   as.Date(vec)
 }
 

@@ -59,6 +59,7 @@ get.by.parse <- function(data, parse, .class=NULL){
 }
 
 get.by.parse.default <- function(data, parse, .class=NULL){
+  #' @exportS3Method
   #' @importFrom magrittr %>%
   #' @importFrom dplyr mutate select across cur_column
   #' @importFrom tidyselect where all_of
@@ -73,6 +74,7 @@ get.by.parse.default <- function(data, parse, .class=NULL){
 
 
 get.by.parse.list <- function(data, parse, .class=NULL){
+  #' @exportS3Method
   .lis <- map(parse, function(i) get.by.parse(data, i, .class), .progress=T)
 
   bindfrm <- do.call(cbind, .lis)

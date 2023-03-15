@@ -16,6 +16,7 @@ apply_discretizer <- function(data, discretizer){
 }
 
 apply_discretizer.Discretizer <- function(data, discretizer){
+  #' @exportS3Method
   .cols <- names(discretizer) %in% colnames(data)
   .cols <- names(discretizer)[.cols]
   data %>% mutate(

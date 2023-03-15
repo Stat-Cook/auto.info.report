@@ -3,14 +3,17 @@ get_sql_table <- function(query){
 }
 
 get_sql_table.tbl_lazy <- function(query){
+  #' @exportS3Method
   get_sql_table(query$lazy_query$x)
 }
 
 get_sql_table.lazy_query <- function(query){
+  #' @exportS3Method
   get_sql_table(query$x)
 }
 
 get_sql_table.ident <- function(query){
+  #' @exportS3Method
   query
 }
 
