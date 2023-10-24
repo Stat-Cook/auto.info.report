@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(MI.report)
+library(auto.info.report)
 ```
 
 When working with multiple data sets it can be helpful to have a standardized 

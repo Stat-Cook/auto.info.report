@@ -1,4 +1,10 @@
 summarize_typed_frame <- function(data, ...){
+  #' Produce variable summaries depending on frame data type
+  #'
+  #' @examples
+  #' tdf2 <- TypedDataFrame2$new(iris)
+  #' summarize_typed_frame(tdf2$parsed_data_frames[["numeric"]])
+  #'
   #' @export
   if (ncol(data) == 0){
     return(data.frame())
@@ -31,18 +37,28 @@ summarize_typed_frame.default <- function(data, ...){
 summarize_typed_frame.numeric.data.frame <- function(data, ...){
   #' @importFrom stats median
   #' @exportS3Method
-  specific.metrics <- data.frame(
-    Mean = sapply(data, mean),
-    Median = sapply(data, median),
-    Min = sapply(data, min),
-    Max = sapply(data, max)
-  )
-  colnames(specific.metrics) <- c("Mean", "Median", "Min", "Max")
+  # specific.metrics <- data.frame(
+  #   Mean = sapply(data, mean),
+  #   Median = sapply(data, median),
+  #   Min = sapply(data, min),
+  #   Max = sapply(data, max)
+  # )
+  # colnames(specific.metrics) <- c("Mean", "Median", "Min", "Max")
+
+  data <- as_tibble(data)
+
+  specific.metrics <- rbind(
+    Mean = summarize(data, across(everything(), mean, na.rm=T)),
+    Median = summarize(data, across(everything(), median, na.rm=T)),
+    Min = summarize(data, across(everything(), min, na.rm=T)),
+    Max = summarize(data, across(everything(), max, na.rm=T))
+  )  %>% t()
 
   default.metrics <- summarize_typed_frame.default(data)
 
   cbind(specific.metrics, default.metrics)
 }
+
 
 summarize_typed_frame.date.data.frame <- function(data, ...){
   #' @exportS3Method
@@ -51,7 +67,8 @@ summarize_typed_frame.date.data.frame <- function(data, ...){
   )
   colnames(specific.metrics) <- c("ID")
 
-  numeric.metrics <- summarize_typed_frame.numeric.data.frame(data)
+  numeric.metrics <- data %>%
+    summarize_typed_frame.numeric.data.frame(data)
 
   cbind(specific.metrics, numeric.metrics)
 }

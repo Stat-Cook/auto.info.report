@@ -1,0 +1,132 @@
+---
+title: "%{report.name}%"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{%{report.name}%}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo=FALSE
+)
+
+library(ggplot2)
+library(MI.report)
+library(plotly)
+library(DT)
+```
+
+``` {r, include=F}
+emptydt <- DT::datatable(data.frame(mtcars))
+htmltools::tagList(emptydt)
+```
+
+
+``` {r, include=F}
+emptyfig <- ggplotly(ggplot())
+htmltools::tagList(emptyfig)
+```
+
+
+```{r setup}
+
+vignette.data <- readRDS("%{file1}%") 
+
+typed.report <- vignette.data$typed.report
+data.report <- vignette.data$data.report
+paired.MI <- vignette.data$paired.MI
+pca.scree <- vignette.data$pca$Scree.Summary
+pca <- vignette.data$pca$PCA
+
+```
+
+%{description}%
+
+Number of variables: `r data.report$ncol`
+
+Number of rows: `r data.report$nrow`
+
+
+
+## Variable summaries {.tabset}
+
+Summary metrics for each of the data types present in the data frame.
+
+``` {r, results = "asis"}
+
+
+.names <- names(typed.report)
+for (name in .names){
+  loop.data <- typed.report[[name]]
+  
+  if (nrow(loop.data) > 0){
+    print(glue::glue("### {name}"))
+    cat("\n")
+
+    dtab <- DT::datatable(loop.data)
+    print(htmltools::tagList(dtab))
+
+    cat("\n") 
+  }
+}
+
+
+```
+
+## Paired Mutual Info
+
+``` {r}
+styled.MI <- dplyr::mutate(paired.MI, `Entropy Ratio` = round(`Entropy Ratio`, 3)) 
+
+DT::datatable(styled.MI, filter="top")
+```
+
+## PCA diagnostics {.tabset}
+
+### Broken Stick Diagnostic
+
+``` {r}
+bs.result <- dplyr::filter(pca.scree, `Variance Captured (Relative)` > `Broken Stick (Relative)`)
+bs.k <- max(bs.result$Component)
+```
+
+Comparison of Actual PCA to Broken Stick model [recommends `r bs.k` component(s)]:
+
+``` {r}
+
+ggplot(pca.scree, aes(x=Component, y=`Variance Captured (Relative)`)) + 
+  geom_point(aes(color="Actual")) + 
+  geom_line(aes(y=`Broken Stick (Relative)`, color="Broken Stick Model"), 
+            linetype="dashed") + 
+  scale_colour_manual(
+    values = c("black", "black"), 
+    guide = guide_legend(
+      override.aes = list(linetype = c("blank", "dashed"), shape = c(16, NA))
+    )
+  ) + labs(colour="")
+```
+
+### Biplots
+
+``` {r, messages=F}
+
+n <- NCOL(pca$x)
+
+scaled_loadings <- data.frame(sweep(pca$rotation, 2, 2*pca$sdev, FUN = "*"))
+scores <- data.frame(pca$x)
+
+q <- max(3, bs.k)
+q <- min(q, n)
+
+suppressPlotlyMessage <- function(p) {
+  suppressMessages(plotly_build(p))
+}
+
+suppressPlotlyMessage(plotly_biplot(scores, scaled_loadings, q))
+
+```
+

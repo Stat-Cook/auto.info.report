@@ -1,6 +1,11 @@
 typed_summary_metrics <- function(data, func=summarize_typed_frame){
+  #' Produce a list of data-type specific variable summaries.
+  #'
+  #' @examples
+  #' typed_summary_metrics(iris)
+  #'
   #' @export
-  tdf <- TypedDataFrame$new(data)
+  tdf <- TypedDataFrame2$new(data)
   tdf$summarize_parsed_frames(summarize_typed_frame)
 }
 
@@ -11,7 +16,9 @@ parse_funcs <- list("numeric" = as.numeric,
                  "factor" = parse_factor
                  )
 
+
 TypedDataFrame <- R6Class("TypedDataFrame", list(
+  #' @importFrom purrr map2
   types = NA,
   parsed.data.frames = list(),
   parsed.columns = list(),

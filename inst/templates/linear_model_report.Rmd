@@ -1,0 +1,71 @@
+---
+title: "%{report.name}%"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{%{report.name}%}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo=FALSE
+)
+
+```
+
+```{r setup, warning=F, message=F}
+
+library(DT)
+library(dplyr)
+
+vigentte.data <- readRDS("%{file1}%")
+
+.head <- vigentte.data$Head
+.summary <- vigentte.data$Summary
+.model <- vigentte.data$Model
+
+```
+
+## Data set
+
+``` {r}
+datatable(.head)
+```
+
+## Coefficient summary
+
+``` {r, warning=F}
+.summary %>% 
+  select(Variable, `Std. Error`, `P value`=`Pr(>|t|)`, `2.5 %`, `97.5 %`) |>
+  mutate(across(where(is.numeric), signif, 3)) |> 
+  datatable()
+```
+
+## Linear model residual diagnostic plots {.tabset}
+
+``` {r, results="asis", echo=F}
+cat("### Residuals vs Fitted\n")
+plot(.model, 1)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Normal Q-Q\n")
+plot(.model, 2)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Scale-Location \n")
+plot(.model, 3)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Residuals vs Leverage\n")
+plot(.model, 5)
+```
+
+
+
+

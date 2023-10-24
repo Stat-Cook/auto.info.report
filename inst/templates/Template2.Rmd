@@ -1,0 +1,133 @@
+---
+title: "%{report.name}%"
+output: rmarkdown::html_vignette
+runtime: shiny
+vignette: >
+  %\VignetteIndexEntry{%{report.name}%}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo=FALSE
+)
+
+library(ggplot2)
+library(shiny)
+library(MI.report)
+library(plotly)
+```
+
+``` {r}
+emptydt <- DT::datatable(data.frame())
+htmltools::tagList(emptydt)
+```
+
+``` {r, include = FALSE}
+fig <- ggplot()
+htmltools::tagList(ggplotly(fig))
+```
+
+```{r setup}
+
+vignette.data <- readRDS("%{file1}%") 
+typed.report <- vignette.data$typed.report
+data.report <- vignette.data$data.report
+paired.MI <- vignette.data$paired.MI
+pca.scree <- vignette.data$pca$Scree.Summary
+pca <- vignette.data$pca$PCA
+```
+
+%{description}%
+
+Number of variables: `r data.report$ncol`
+
+Number of rows: `r data.report$nrow`
+
+
+
+## Variable summaries {.tabset}
+
+Summary metrics for each of the data types present in the data frame.
+
+``` {r, results = "asis"}
+
+
+.names <- names(typed.report)
+for (name in .names){
+  loop.data <- typed.report[[name]]
+  
+  if (nrow(loop.data) > 0){
+    print(glue::glue("### {name}"))
+    cat("\n")
+
+    dtab <- DT::datatable(loop.data)
+    print(htmltools::tagList(dtab))
+
+    cat("\n") 
+  }
+}
+
+
+```
+
+## Paired Mutual Info
+
+``` {r}
+styled.MI <- dplyr::mutate(paired.MI, `Entropy Ratio` = round(`Entropy Ratio`, 3)) 
+
+DT::datatable(styled.MI, filter="top")
+```
+
+
+## PCA diagnostics {.tabset}
+
+### Broken Stick Diagnostic
+
+``` {r}
+bs.result <- dplyr::filter(pca.scree, `Variance Captured (Relative)` > `Broken Stick (Relative)`)
+bs.k <- max(bs.result$Component)
+```
+
+Comparison of Actual PCA to Broken Stick model [recommends `r bs.k` component(s)]:
+
+``` {r}
+
+ggplot(pca.scree, aes(x=Component, y=`Variance Captured (Relative)`)) + 
+  geom_point(aes(color="Actual")) + 
+  geom_line(aes(y=`Broken Stick (Relative)`, color="Broken Stick Model"), 
+            linetype="dashed") + 
+  scale_colour_manual(
+    values = c("black", "black"), 
+    guide = guide_legend(
+      override.aes = list(linetype = c("blank", "dashed"), shape = c(16, NA))
+    )
+  ) + labs(colour="")
+```
+
+<!-- ```{r, results="asis"} -->
+
+<!-- k <- length(pca$sdev) -->
+<!-- k <- min(k, 4) -->
+
+<!-- pca.prep <- pca_bi_prep(pca) -->
+
+<!-- for (i in 1:k){ -->
+<!--   combs <- t(combn(4, 2)) -->
+<!--   nrow(combs) -->
+<!--   j <- combs[i,] -->
+
+<!--   cat(glue::glue("### PC{j[1]} vs PC{j[2]}")) -->
+
+<!--   cat("\n") -->
+
+<!--   plt <- bi.plot(pca.prep, j[1], j[2]) -->
+<!--   print(htmltools::tagList(plt)) -->
+<!--   cat("\n\n\r") -->
+
+<!-- } -->
+
+<!-- ``` -->

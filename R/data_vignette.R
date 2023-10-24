@@ -1,5 +1,5 @@
-default_template_path <- function(){
-  system.file("templates", "Template.RMD", package="MI.report")
+default_template_path <- function(template){
+  system.file("templates", template, package="auto.info.report")
 
 }
 

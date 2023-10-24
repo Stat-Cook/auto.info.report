@@ -80,6 +80,7 @@ missing <- (1:3)[!(1:3 %in% 1:1)]
 # }
 
 
+
 plotly_biplot <- function(scores, loadings, n=3){
   #' Produce an interactive biplot for unique pairs of the top `n`
   #' principal components
@@ -88,8 +89,18 @@ plotly_biplot <- function(scores, loadings, n=3){
   #'
   #'
   #' @export
-  #' @importFrom plotly plot_ly layout
+  #' @importFrom plotly plot_ly layout add_markers
   #'
+  #' @examples
+  #' \dontrun{
+  #' mat <- model.matrix(~., data=iris)
+  #' pca <- prcomp(mat)
+  #'
+  #' scaled_loadings <- data.frame(sweep(pca$rotation, 2, 2*pca$sdev, FUN = "*"))
+  #' scores <- data.frame(pca$x)
+  #'
+  #' plotly_biplot(scores, scaled_loadings)
+  #' }
 
   score.names <- colnames(scores)
   pc.names <- glue("PC{1:n}")

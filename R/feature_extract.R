@@ -43,7 +43,13 @@ as.character_with_na <- function(vec){
   vec
 }
 
+
 styled_model_matrix <- function(data, formula= ~ . , style_func=style_contrasts){
+  #' Produce a model.matrix embedding with variables named as defined by `style_func`
+  #'
+  #' @examples
+  #' styled_model_matrix(iris, Sepal.Length ~ Sepal.Width + Species)
+  #'
   #' @importFrom plyr is.discrete
 
   data.ns <- data %>% select(is.not.singular)
@@ -69,7 +75,21 @@ styled_model_matrix <- function(data, formula= ~ . , style_func=style_contrasts)
   )
 }
 
+
 is.binary <- function(vec){
+  #' Check if a vector is binary (only has values 1, 0, TRUE, or FALSE)
+  #'
+  #' @examples
+  #'
+  #' vec <- sample(c(0,1), 30, T)
+  #' is.binary(vec) # True
+  #'
+  #' vec <- sample(c(0,1, T, F), 30, T)
+  #' is.binary(vec) # True
+  #'
+  #' vec <- sample(4, 30, T)
+  #' is.binary(vec) # False
+  #'
   all(vec == 0 | vec == 1)
 }
 
@@ -77,12 +97,20 @@ is.not.binary <- function(vec){
   !is.binary(vec)
 }
 
+
+
+
+
 group_standardize <- function(data, cols){
   #' Correct scaling for categorical variables.
   #'
   #' Standardizes so that groups of variables from the same factor have total var
   #' of one, and each variable has zero-mean.
   #'
+  #' @examples
+  #' mat <- as_tibble(model.matrix(~ Species, data=iris))
+  #' group_standardize(mat, c("Speciesversicolor", "Speciesvirginica"))
+
   frm <- data %>% select(all_of(cols))
 
   col.means <- frm %>%
@@ -96,6 +124,7 @@ group_standardize <- function(data, cols){
 
 scaled.data.matrix <- function(data.matrix, factors=list()){
   #' @importFrom dplyr as_tibble
+  #'
   non.factor.data <- data.matrix  %>%
     select(!unlist(factors))
 
@@ -202,6 +231,8 @@ feature_extract <- function(data){
   #'
   #' @param data The data set to be summarized
   #'
+  #' @examples
+  #' feature_extract(iris)
   #' @export
   list(
     typed.report = typed_summary_metrics(data),

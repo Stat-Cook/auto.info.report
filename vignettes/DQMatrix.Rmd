@@ -1,0 +1,92 @@
+---
+title: "Constructing a DQ Matrix"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Constructing a DQ Matrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(auto.info.report)
+```
+
+Analysis is only as good as the data that underpins it.  Hence, the first task when presented with any data set must be to explore dimensions of data quality associated with the variables.  To help streamline this process, a 'Data Quality Matrix' report has been implemented within the supplied automated reports.
+
+The creation of DQ reports requires three components:
+
+* The `data` set of interest 
+* A `Data.Report` object to construct the report within
+* At least one `dq_rule` to be applied to `data`
+
+For this example the `data` set will be the commonly used 'iris' data supplied with R.  The iris data set consists of 150 observations of 5 variables (`Sepal.Length`, `Sepal.Width`, `Petal.Length`, `Petal.Width`, and `Species`) 4 of which are numeric, with `Species` being a factor/ categorical variable.
+
+``` {r}
+head(iris)
+```
+
+To construct a new `Date.Report` we call the function `new_data_report` supplying a system path to define the location for the new documentation.   
+
+``` {r, messages=F, message=F, eval=F}
+data.report <- new_data_report("~/Data.Report.Example")
+```
+
+`new_data_report` initializes a basic R project at the supplied `path`, with the intention of publishing the defined vignettes and documentation as a stand alone website via the `pkgdown` package.  
+
+The `dq_rules` can be defined via calls to either `new_rule` or `new_variable_rule` functions, requiring:
+
+* A huamn-readable name for the `dq_rule` which is included in the report
+* A function to quantify the desired behavior, returning TRUE for a pass and FAIL otherwise.
+* A `tidyselect` function to define which variables the rule will be applied to.  By default the rule is applied to every variable in the data set.
+
+In the following example we define two rules:
+
+* `rule.1` checks which values of a variable are `NA` and applies to every variable.
+* `rule.2` will check if values are in the inclusive domain $[0, \infty]$ and applies only to numeric variables.
+
+``` {r, warning=F}
+library(tidyselect)
+
+rule.1 <- new_rule("Not NA", function(vec) !is.na(vec))
+rule.2 <- new_rule("Only positive values", function(vec) vec >= 0, where(is.numeric))
+```
+
+
+The difference between `new_rule` and `new_variable_rule` is simple - `new_rule` will apply to every value of a variable, whereas `new_variable_rule` applies to a variable in it's entirety.  To demonstrate the following example defines a `new_variable_rule`:
+
+* `rule.3` will check if the skewness of a variable sits within the interval $[-2, 2]$ and applies only to numeric variables.
+  
+``` {r} 
+
+limit.skewness <- function(vec, limit=2) {
+  skew <- e1071::skewness(vec)
+  abs(skew) < limit
+}
+
+rule.3 <- new_variable_rule("Skewness ~0", limit.skewness, where(is.numeric))
+```
+
+The final step is to combine the data, report and rules in a call to `add_rule_vigentte` (we include a name and description for this particular report to aid in interpretation).  
+
+``` {r, eval=F}
+.rules <- list(rule.1, rule.2, rule.3)
+add_rule_vignette(data=iris, .rules = .rules, data_report = data.report, 
+                  name="Iris DQ Example", 
+                  description="DQ rule results as applied to the 'iris' data set supplied with R.")
+```
+
+With this vigentte now registered the site can be built
+
+``` {r, eval=F}
+data.report$build_site()
+```
+
+If you wish to make the DQ reports public, we recommend pushing the `data.report` project to github and listing the 'docs' directory as the root of a github pages as described [here](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+

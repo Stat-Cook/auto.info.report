@@ -34,12 +34,14 @@ DataReport <- R6Class("DataReport", list(
   },
 
   add_vignette = function(data=NULL, name=NULL, description="",
-                          template_path = default_template_path(), ...){
+                          template = "Template.Rmd",
+                          template_path = default_template_path(template), ...){
     if (is.null(name)){
       name <- as.character(substitute(data))
     }
 
-    add_vignette(self$path, name, description, data, ...)
+    add_vignette(self$path, name, description, data,
+                 template_path=template_path,...)
     self$vignettes <- c(self$vignettes, name)
   },
 
@@ -73,6 +75,12 @@ new_data_report <- function(path=NULL){
   #' Creates a data report project structure and object.
   #'
   #' @param path The path to the data report root
+  #'
+  #' @examples
+  #' \dontrun{
+  #'   new_data_report('~/Example.Data.Report')
+  #' }
+  #'
   #' @export
   DataReport$new(path)
 }

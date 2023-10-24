@@ -1,0 +1,91 @@
+---
+title: "Defining and applying data quality rules"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Defining and applying data quality rules}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(knitr)
+```
+
+As part of the 'auto.info.report' package we have supplied a framework for building and applying your own data quality rules.  In the package we consider two distinct types of data quality measure:
+
+1. Those that apply to each value of a variable, e.g. are observations missing, or aren't within the expected domain.
+2.  Those that apply at the variable level, e.g. are the variable highly skewed, or have > 10% missing values.
+
+The core of this behavior are the `new_rule` and `new_variable_rule` functions - which are used for defining the *expected* behavior i.e. `TRUE` implies quality.  Each function takes three parameters:
+
+* A human readable name
+* A function to define the prefered behaviour
+* [optional] a `tidyselect` function of variables to apply the rules to.  By default rules will apply  to every variable.
+
+```{r setup}
+library(auto.info.report)
+library(tidyselect)
+
+rule.1 <- new_rule("Non-missing values", function(x) !is.na(x))
+
+variable.rule.1 <- new_variable_rule("Low skew", 
+                  function(x) abs(e1071::skewness(x)) < 2, 
+                  where(is.numeric))
+
+rule.list <- list(rule.1, variable.rule.1)
+```
+
+With rules defined, we call `apply_rules` and `dq_rule_report` to produce a list with two items:
+
+* `ValueRules` to summarize the rules defined via `new_rule`
+* `VariableRules` to summarize the rules defined via `new_variable_rule`
+
+``` {r, results="asis"}
+dq.list <- apply_rules(iris, rule.list)
+rule.report <- dq_rule_report(dq.list)
+```
+
+The `ValueRules` summarize what percentage of each variable follows the rule:
+
+```{r}
+kable(rule.report$ValueRules)
+```
+
+The `VaraiableRules` summarize if the variable(s) follows the rule:
+
+``` {r}
+kable(rule.report$VariableRules)
+```
+
+### Useful utility functions
+
+To aid in construction of DQ rules, we supply a few helper functions:
+
+* `select_numerics` for rules to apply to numeric variables
+* `select_booleans` for rules to apply to logical variables
+* `select_dates`  for rules to apply to date variables
+* `select_POSIXct` for rules to apply to datetime variables
+* `select_character` for rules to apply to string variables
+* `select_factor` for rules to apply to factor variables
+* `select_categorical` for rules to apply to string and factor variables
+
+while the general family of `tidyselect` verbs can be used, e.g.:
+
+* `starts_with`
+* `ends_with`
+* `matches`
+* `contains`
+
+To aid in creating the rules we supply a similar set of functions:
+
+* `greater_than.f` and `greater_than_zero`
+* `less_than.f` and `less_than_zero`
+* `not.na`
+* `one_of.f`
+* `limited_cardinality`
+* `within_interval`

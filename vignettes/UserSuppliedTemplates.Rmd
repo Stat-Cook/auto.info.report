@@ -1,0 +1,170 @@
+---
+title: "Using your own rmarkdown templates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using your own rmarkdown templates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(auto.info.report)
+```
+
+`R Markdown` is an incredibly useful, and flexible method for reporting our analysis.  In some situations however we might want to run the same report on multiple data sets, and easily present all the reports via a shared front end.  This is the core thought behind this package - can we implement simple R markdown templates and use them for different data sets?
+
+The core of the package is the `DataReport` object.  Created with a call to `new_data_report` (including the destination for the file structure) the `DataReport` serves as a programmatic binding to an empty R package which we can populate with vignettes and documentation.  Once all the documents have been added, the `pkgdown` library then allows us to easily convert the documentation to a hosting-ready web resource. 
+
+Vignette creation is predicated on first creating a `DataReport` object and then using the `add_vignette` method to include completed RMarkdown files.
+
+``` {r, eval=F}
+data.report <- new_data_report("~/Data.Report.Example")
+
+data.report$add_vignette(data = ...)
+```
+
+The `add_vignette` method stashes the `data` argument in the `DataReport` file structure accessible within the  template if it contains the line:
+
+```{r, eval=F}
+vigentte.data <- readRDS("%{file1}%") # NB: the variable name `vigentte.data` is purely exemplary
+```
+
+
+Alongside the pre-designed templates (see XXX) users can create their own templates with relative ease.  Any existing RMarkdown document can be converted to a template by following two core concepts, 
+
+1. Any R objects that are required for the report should be constructed into a list and passed into the `data` argument with the command `readRDS("%{file1}%")` assigned to a  variable in the template.  From their the R objects can be accessed as needed.
+
+2. Text can also be piped into the template in a similar manner, with any keywords enclosed by `%{...}%` serving as keyword arguments to `add_vignette`.
+
+As an example - imagine we wish to make a standard report for linear regression.  We desire three features:
+
+* The first 5 lines of the data set fit.
+* The summary table of coefficients and 95% confidence intervals
+* The 4 diagnostic plots made by `plot.lm`
+
+Our first step is to create a function to place all the necessary resources in a single list.
+
+``` {r, warning=F, messages=F}
+
+model.iris <- lm(Sepal.Length ~ Sepal.Width + Petal.Length, data=iris)
+model.air <- lm(Ozone ~ Solar.R + Wind + Temp, data=airquality)
+
+library(dplyr)
+
+prepare.lm <- function(data, model){
+  
+  first5 <- head(data, 5)
+  
+  .coefs <- summary(model)$coefficients
+  .ci <- confint(model)
+  
+  summary.table <- cbind(.coefs, .ci) |> 
+    as_tibble() |>
+    mutate(Variable = rownames(.coefs))
+  
+  list(Head = first5, 
+       Summary = summary.table,
+       Model = model
+     )
+}
+
+vigentte.data <- prepare.lm(iris, model.iris)
+
+```
+
+Next we can design a template.  To demonstrate this, we will implement the analysis here and then link to an RMD file with the same code laid out as a single document.  The steps we need are:
+
+1. unpack the `vignette.data` object back into the useful terms, and import any required packages. 
+
+
+``` {r}
+library(DT)
+#vigentte.data <- readRDS("%{file1}%")
+
+.head <- vigentte.data$Head
+.summary <- vigentte.data$Summary
+.model <- vigentte.data$Model
+```
+
+2. Perform the first task (print the 1st 5 lines of the data set)
+
+``` {r}
+data.table(.head)
+
+```
+
+3. Display the coefficient summary  and apply styling.
+
+``` {r, warning=F}
+library(dplyr)
+
+.summary %>% 
+  select(Variable, `Std. Error`, `P value`=`Pr(>|t|)`, `2.5 %`, `97.5 %`) |>
+  mutate(across(where(is.numeric), signif, 3)) |> 
+  datatable()
+```
+
+4. Produce each of the diagnostic plots of interest (NB: for convenience we call each seperately - this are the four plots produced by `plot.lm` by default).
+
+``` {r, results="asis", eval=F}
+cat("### Residuals vs Fitted\n")
+plot(.model, 1)
+
+cat("### Normal Q-Q\n")
+plot(.model, 2)
+
+cat("### Scale-Location \n")
+plot(.model, 3)
+
+cat("### Residuals vs Leverage\n")
+plot(.model, 5)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Residuals vs Fitted\n")
+plot(.model, 1)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Normal Q-Q\n")
+plot(.model, 2)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Scale-Location \n")
+plot(.model, 3)
+```
+
+``` {r, results="asis", echo=F}
+cat("### Residuals vs Leverage\n")
+plot(.model, 5)
+```
+
+``` {r}
+link <- system.file("templates", "DQ_matrix.rmd", package="MI.report")
+```
+
+These four blocks of code can simply be inserted into their own Rmd file, and called as a template.  The complete file is available [here](`r link`) where we have added section headings to aid readability using standard markdown.
+
+To use the 
+
+
+``` {r}
+
+DataReport$new
+
+```
+
+``` {r}
+data.report$add_vignette(vigentte.data, "Iris LM", 
+                         template_path = "../inst/templates/linear_model_report.RMD")
+
+data.report$build_site()
+```

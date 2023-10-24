@@ -1,4 +1,4 @@
-Package: MI.report
+Package: auto.info.report
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
@@ -12,7 +12,8 @@ License: MIT + file LICENSE
 RoxygenNote: 7.2.1
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports:
   glue,
@@ -30,4 +31,4 @@ Imports:
   DT,
   infotheo,
   tidyr
-
+Config/testthat/edition: 3

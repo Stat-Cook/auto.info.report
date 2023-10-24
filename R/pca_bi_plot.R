@@ -23,6 +23,10 @@ bi.plot <- function(pca, x.index, y.index){
   #' @param x.index numeric index of principal component to plot.
   #' @param y.index numeric index of principal component to plot.
   #'
+  #' @examples
+  #' mat <- model.matrix(~., data=iris)
+  #' pca <- prcomp(mat)
+  #' bi.plot(pca, 1, 2)
   #' @export
   UseMethod("bi.plot", pca)
 }

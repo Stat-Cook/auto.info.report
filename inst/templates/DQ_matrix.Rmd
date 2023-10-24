@@ -1,0 +1,64 @@
+---
+title: "%{report.name}%"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{%{report.name}%}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo=FALSE
+)
+
+library(DT)
+
+```
+
+``` {r, include=F}
+emptydt <- DT::datatable(data.frame(mtcars))
+htmltools::tagList(emptydt)
+```
+
+
+``` {r, include=F}
+# emptyfig <- ggplotly(ggplot())
+# htmltools::tagList(emptyfig)
+```
+
+
+```{r setup}
+
+vignette.data <- readRDS("%{file1}%") 
+
+dq_rule_report <- vignette.data$dq_rule_report
+
+```
+%{description}%
+
+## Variable summaries {.tabset}
+
+Results for the defined data quality rules.
+
+
+``` {r, results = "asis"}
+
+print(glue::glue("### Value Rule Report"))
+cat("\n")
+dtab <- MI.report::styled_value_report(dq_rule_report)
+print(htmltools::tagList(dtab))
+cat("\n")
+
+print(glue::glue("### Variable Rule Report"))
+cat("\n")
+dtab <- MI.report::styled_variable_report(dq_rule_report)
+print(htmltools::tagList(dtab))
+cat("\n")
+
+```
+
+
+

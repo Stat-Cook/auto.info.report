@@ -54,6 +54,17 @@ is.not.singular <- function(vec){
   !is.singular(vec)
 }
 
+
+is.categorical <- function(vec){
+  is.character(vec) | is.factor(vec)
+}
+
+
+is.not.categorical <- function(vec){
+  !is.categorical(vec)
+}
+
+
 paired.mutinfo <- function(data){
   #' @importFrom dplyr desc filter arrange
   #' @importFrom tidyr pivot_longer
@@ -63,14 +74,19 @@ paired.mutinfo <- function(data){
 
   singular.cols <- data %>% select(where(is.singular)) %>% colnames()
 
+
   if (length(singular.cols)){
     msg <- paste(singular.cols, collapse=", ")
     warning(glue("Column(s) {msg} were excluded from mutual \\
                  information analysis (singular)."))
   }
 
+  # TODO: consider discretizing all numeric data.
+  # TODO: consider renaming discretized variables to identify method.
+
   disc  <- data %>%
     select(-all_of(singular.cols)) %>%
+    mutate(across(where(is.not.categorical), as.numeric))  %>%
     discretize()
 
   disc[is.na(disc)] <- "NA"
@@ -88,3 +104,5 @@ paired.mutinfo <- function(data){
     arrange(desc(`Entropy Ratio`))
 
 }
+
+?union

@@ -55,15 +55,6 @@ make.date.parse <- function(frmt){
 parse_dates <- purrr::map(DATE.FORMATS, make.date.parse)
 parse_dates <- append(parse_dates, list("None" = date_function))
 
-parse_datetimes <- function(data, date.time.formats=DATE.TIME.FORMATS){
-  .lis <- lapply(
-    date.time.formats,
-    function(i) strptime(data, i)
-  )
-  reduce(.lis, na_reduce)
-}
-
-
 datetime_function <- function(vec){
   UseMethod("datetime_function")
 }
