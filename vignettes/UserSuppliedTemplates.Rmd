@@ -96,7 +96,7 @@ library(DT)
 2. Perform the first task (print the 1st 5 lines of the data set)
 
 ``` {r}
-data.table(.head)
+datatable(.head)
 
 ```
 
@@ -155,14 +155,7 @@ These four blocks of code can simply be inserted into their own Rmd file, and ca
 
 To use the 
 
-
-``` {r}
-
-DataReport$new
-
-```
-
-``` {r}
+``` {r, eval=F}
 data.report$add_vignette(vigentte.data, "Iris LM", 
                          template_path = "../inst/templates/linear_model_report.RMD")
 

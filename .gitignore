@@ -4,3 +4,7 @@ inst/doc
 /Meta/
 
 .Rproj.user/
+
+.RData
+
+_pkgdown.yml
